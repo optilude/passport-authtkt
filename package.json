@@ -22,7 +22,6 @@
   "dependencies": {
     "pkginfo": "0.2.x",
     "passport": "~0.1.1",
-    "underscore": "1.4.4",
     "sprintf": "0.1.1",
     "jspack": "0.0.1"
   },
