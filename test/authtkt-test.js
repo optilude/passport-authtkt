@@ -5,7 +5,7 @@ var AuthTkt = require('passport-authtkt').AuthTkt;
 
 vows.describe("AuthTkt").addBatch({
 
-    'ticket management': {
+    'basic ticket management': {
         topic: new AuthTkt('abcdefghijklmnopqrstuvwxyz0123456789'),
 
         "supports constant-time comparison for strings": function(authtkt) {
@@ -79,33 +79,6 @@ vows.describe("AuthTkt").addBatch({
             assert.isNull(data);
         },
 
-        "can store user data and tokens": function(authtkt) {
-            var timeout = 12*60*60;
-            var userid = 'jbloggs';
-            var timestamp = 1216720800;
-            var now = timestamp + 60*60;
-            var userData = 'Joe Bloggs';
-            var tokens = ['foo', 'bar'];
-
-            var tkt = authtkt.createTicket(userid, {
-                tokens: tokens,
-                userData: userData,
-                timestamp: timestamp,
-                encodeUserData: false
-            });
-            assert.equal(tkt, 'eea3630e98177bdbf0e7f803e1632b7e4885afa0jbloggs!foo,bar!Joe Bloggs');
-
-            var data = authtkt.validateTicket(tkt, {timeout: timeout, now: now, encodeUserData: false});
-
-            assert.deepEqual(data, {
-                digest: 'eea3630e98177bdbf0e7f803e1632b7e',
-                userid: 'jbloggs',
-                tokens: ['foo', 'bar'],
-                userData: 'Joe Bloggs',
-                timestamp: 1216720800
-            });
-        },
-
         "stores user data base64 encoded by default": function(authtkt) {
             var timeout = 12*60*60;
             var userid = 'jbloggs';
@@ -156,6 +129,103 @@ vows.describe("AuthTkt").addBatch({
                 userid: 'jbloggs',
                 tokens: [],
                 userData: '',
+                timestamp: 1216720800
+            });
+        }
+    },
+
+    'raw user data': {
+        topic: new AuthTkt('abcdefghijklmnopqrstuvwxyz0123456789', {
+            encodeUserData: false
+        }),
+
+        "can store user data and tokens": function(authtkt) {
+            var timeout = 12*60*60;
+            var userid = 'jbloggs';
+            var timestamp = 1216720800;
+            var now = timestamp + 60*60;
+            var userData = 'Joe Bloggs';
+            var tokens = ['foo', 'bar'];
+
+            var tkt = authtkt.createTicket(userid, {
+                tokens: tokens,
+                userData: userData,
+                timestamp: timestamp
+            });
+            assert.equal(tkt, 'eea3630e98177bdbf0e7f803e1632b7e4885afa0jbloggs!foo,bar!Joe Bloggs');
+
+            var data = authtkt.validateTicket(tkt, {timeout: timeout, now: now});
+
+            assert.deepEqual(data, {
+                digest: 'eea3630e98177bdbf0e7f803e1632b7e',
+                userid: 'jbloggs',
+                tokens: ['foo', 'bar'],
+                userData: 'Joe Bloggs',
+                timestamp: 1216720800
+            });
+        }
+    },
+
+    'raw JSON user data': {
+        topic: new AuthTkt('abcdefghijklmnopqrstuvwxyz0123456789', {
+            encodeUserData: false,
+            jsonUserData: true
+        }),
+
+        "can store JSON data": function(authtkt) {
+            var timeout = 12*60*60;
+            var userid = 'jbloggs';
+            var timestamp = 1216720800;
+            var now = timestamp + 60*60;
+            var userData = {name: 'Joe Bloggs', id: 'jbloggs'};
+            var tokens = ['foo', 'bar'];
+
+            var tkt = authtkt.createTicket(userid, {
+                tokens: tokens,
+                userData: userData,
+                timestamp: timestamp
+            });
+            assert.equal(tkt, '8719125c239300c4aa11c3506519b7d04885afa0jbloggs!foo,bar!{"name":"Joe Bloggs","id":"jbloggs"}');
+
+            var data = authtkt.validateTicket(tkt, {timeout: timeout, now: now});
+
+            assert.deepEqual(data, {
+                digest: '8719125c239300c4aa11c3506519b7d0',
+                userid: 'jbloggs',
+                tokens: ['foo', 'bar'],
+                userData: {name: 'Joe Bloggs', id: 'jbloggs'},
+                timestamp: 1216720800
+            });
+        }
+    },
+
+    'encoded JSON user data': {
+        topic: new AuthTkt('abcdefghijklmnopqrstuvwxyz0123456789', {
+            jsonUserData: true
+        }),
+
+        "can store JSON data encoded as base64": function(authtkt) {
+            var timeout = 12*60*60;
+            var userid = 'jbloggs';
+            var timestamp = 1216720800;
+            var now = timestamp + 60*60;
+            var userData = {name: 'Joe Bloggs', id: 'jbloggs'};
+            var tokens = ['foo', 'bar'];
+
+            var tkt = authtkt.createTicket(userid, {
+                tokens: tokens,
+                userData: userData,
+                timestamp: timestamp
+            });
+            assert.equal(tkt, '8719125c239300c4aa11c3506519b7d04885afa0jbloggs!foo,bar!eyJuYW1lIjoiSm9lIEJsb2dncyIsImlkIjoiamJsb2dncyJ9');
+
+            var data = authtkt.validateTicket(tkt, {timeout: timeout, now: now});
+
+            assert.deepEqual(data, {
+                digest: '8719125c239300c4aa11c3506519b7d0',
+                userid: 'jbloggs',
+                tokens: ['foo', 'bar'],
+                userData: {name: 'Joe Bloggs', id: 'jbloggs'},
                 timestamp: 1216720800
             });
         }
