@@ -23,7 +23,8 @@
     "pkginfo": "0.2.x",
     "passport": "~0.1.1",
     "sprintf": "0.1.1",
-    "jspack": "0.0.1"
+    "jspack": "0.0.1",
+    "underscore": "1.4.4"
   },
   "devDependencies": {
     "vows": "0.6.x"

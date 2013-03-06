@@ -21,7 +21,7 @@ vows.describe("AuthTkt").addBatch({
         },
 
         "creates mod_auth_tkt double digests": function(authtkt) {
-            assert.equal(authtkt.createDigest("secret", "data1", "data2"), "45409cbaf692d8213a128b703edd5ce2");
+            assert.equal(authtkt.createDigest("data1", "data2"), "77d59b347df3b662736905b19740c822");
         },
 
         "provides an inet_aton algorithm to pack dotted quads into four bytes": function(authtkt) {
@@ -70,6 +70,7 @@ vows.describe("AuthTkt").addBatch({
 
             // An hour after creation
             now = timestamp + 60*60;
+            debugger;
             data = authtkt.validateTicket(tkt, {timeout: timeout, now: now});
             assert.isNotNull(data);
 
