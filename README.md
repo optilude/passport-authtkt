@@ -11,20 +11,40 @@
 
 #### Configure Strategy
 
-The AuthTkt strategy authenticates users using a ticket set in a cookie.
+The AuthTkt authentication strategy authenticates requests based on the
+presence and validity of an auth_tkt cookie. To use it, you should configure
+the `cookieParser` middleware as well as Passport:
 
-    passport.use(new AuthTktStrategy('secret'));
+    app.configure(function() {
+        app.use(express.cookieParser());
+        app.use(express.bodyParser());
+        app.use(passport.initialize());
+        app.use(app.router);
+        app.use(express.static(__dirname + '/../../public'));
+    });
 
-The first arugment is a string containing a secret, used to encrypt the cookie.
-This argument is required.
+To use the strategy:
 
-An optional second argument can be given with options:
+    authtkt = require('passport-authtkt');
 
-  passport.use(new AuthTktStrategy('secret', {
-    timeout: 60*60*3, // time out after 3 hours
-    key: '_auth',     // cookie name, defaults to 'authtkt'
-    ip: '127.0.0.1'   // validate cookie against this IP address
-  });
+    ...
+
+    passport.use(new authtkt.Strategy('mysecret', {
+        timeout: 60*60, // 1 hour timeout; omit to not have a timeout
+        encodeUserData: true,
+        jsonUserData: true
+    }));
+
+Valid options include:
+
+* `key` - name of the cookie.
+* `encodeUserData - encode and decode the userData string using base64.
+   Defaults to true.
+* `jsonUserData` - encode and decode the userData string as JSON.
+   Defaults to false.
+* `ip` - use the given IP address (a dotted quad string) to create/validate
+  tickets.
+* `timeout` - time, in seconds, for ticket validation.
 
 #### Authenticate Requests
 
@@ -34,11 +54,35 @@ authenticate requests.
 For example, as route middleware in an [Express](http://expressjs.com/)
 application:
 
-    app.post('/members',
-      passport.authenticate('authtkt', { failureRedirect: '/login' }),
-      function(req, res) {
-        ...
-      });
+    app.post('/foo', 
+        passport.authenticate('authtkt', { failureRedirect: '/login' }),
+        function(req, res) {
+            ...
+        }
+    );
+
+Note that the authenticator does not need to store anything in the session.
+If you do not configure any session middleware, you should pass
+`session: false` in the options to the authentication hook:
+
+    app.post('/foo', 
+        passport.authenticate('authtkt', { session: false, failureRedirect: '/login' }),
+        function(req, res) {
+            ...
+        }
+    );
+
+When the authenticator is used, `req.authInfo` will be the parsed ticket as
+ returned by `AuthTkt.splitTicket()`, assuming authentication was successful.
+`req.user` will be the same as `req.authInfo.userData`.
+
+The `AuthTkt` instance configured with the secret and options is available
+as `strategy.authtkt`. This can be used e.g. to call `createTicket()` during
+login.
+
+When `req.authInfo` is set on requests where the authenticator is used, the
+authentication cookie will be set if either there is a timeout configured, or
+the user id, user data or tokens for the ticket in `req.authInfo` has changed.
 
 #### Saving the ticket cookie
 
