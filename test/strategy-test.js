@@ -97,6 +97,49 @@ vows.describe('AuthTktStrategy').addBatch({
                     assert.isUndefined(req.authInfo);
                 }
             }
+        },
+
+        'strategy handling a request with default options and an invalid cookie': {
+            topic: function() {
+                return new AuthTktStrategy('abcdefghijklmnopqrstuvwxyz0123456789');
+            },
+    
+            'after augmenting with actions': {
+                topic: function(strategy) {
+                    var self = this;
+                    var req = {};
+                    strategy.success = function(user, info) {
+                      self.callback(null, req, user, info);
+                    };
+
+                    strategy.fail = function() {
+                      self.callback(new Error('should-not-be-called'), req);
+                    };
+                
+                    req.cookies = {
+                        authtkt: 'foo'
+                    };
+                    req.res = {};
+                    req.res.on = function(event, fn) {
+
+                    };
+                    req.res.clearCookie = function(name) {
+
+                    };
+                
+                    process.nextTick(function () {
+                        strategy.authenticate(req);
+                    });
+                },
+          
+                'should fail' : function(err, req, user, info) {
+                    assert.isNotNull(err);
+                },
+                
+                'should not set authInfo' : function(err, req, user, info) {
+                    assert.isUndefined(req.authInfo);
+                }
+            }
         }
   }
 }).export(module);
