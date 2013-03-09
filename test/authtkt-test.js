@@ -70,7 +70,6 @@ vows.describe("AuthTkt").addBatch({
 
             // An hour after creation
             now = timestamp + 60*60;
-            debugger;
             data = authtkt.validateTicket(tkt, {timeout: timeout, now: now});
             assert.isNotNull(data);
 
