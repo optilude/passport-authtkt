@@ -1,6 +1,6 @@
 {
   "name": "passport-authtkt",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "mod_auth_tkt based authentication.",
   "keywords": ["passport", "auth_tkt", "auth", "authtkt", "authentication"],
   "repository": {

@@ -101,9 +101,12 @@ is set later by other middleware or routes.
 
 To create a cookie, use the helper functions `createTicket()` and
 `encodeCookieValue()` on an `AuthTkt` instance. For example, a login route
-may do the following:
+may do the following, using the `getStrategy()` helper function to obtain the
+currently configured strategy instance:
 
-    var strategy = req._passport.instance._strategy('authtkt');
+    var authtkt = require('passport-authtkt');
+
+    var strategy = authtkt.getStrategy(req);
     var ticket = strategy.authtkt.createTicket(user.id, {userData: user});
     return res.cookie(strategy.key, strategy.authtkt.base64Encode(ticket));
 
