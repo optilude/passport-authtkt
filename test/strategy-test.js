@@ -249,6 +249,128 @@ vows.describe('AuthTktStrategy').addBatch({
             }
         },
 
+        'strategy handling a request with options passed to the authenticate method': {
+            topic: function() {
+                return new AuthTktStrategy('abcdefghijklmnopqrstuvwxyz0123456789');
+            },
+    
+            'after augmenting with actions': {
+                topic: function(strategy) {
+                    var self = this;
+                    var req = {};
+                    strategy.success = function(user, info) {
+                        req.authInfo = info;
+                        self.callback(null, req, user, info);
+                    };
+
+                    strategy.fail = function() {
+                        self.callback(new Error('should-not-be-called'), req);
+                    };
+                
+                    req.cookies = {
+                        authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFKb2UgQmxvZ2dz'
+                    };
+                    req.res = {};
+                    req.res.on = function(event, fn) {
+                    };
+                
+                    process.nextTick(function () {
+                         strategy.authenticate(req, {encodeUserData: false});
+                    });
+                },
+          
+                'should not fail' : function(err, req, user, info) {
+                    assert.isNull(err);
+                },
+                
+                'should set authInfo' : function(err, req, user, info) {
+                    assert.deepEqual(info, {
+                        digest: 'eea3630e98177bdbf0e7f803e1632b7e',
+                        userid: 'jbloggs',
+                        tokens: ['foo', 'bar'],
+                        userData: 'Joe Bloggs',
+                        timestamp: 1216720800
+                    });
+                },
+
+                'should set req.authInfo' : function(err, req, user, info) {
+                    assert.deepEqual(req.authInfo, {
+                        digest: 'eea3630e98177bdbf0e7f803e1632b7e',
+                        userid: 'jbloggs',
+                        tokens: ['foo', 'bar'],
+                        userData: 'Joe Bloggs',
+                        timestamp: 1216720800
+                    });
+                },
+
+                'should set user to be the user data' : function(err, req, user, info) {
+                    assert.equal(user, 'Joe Bloggs');
+                }
+            }
+        },
+
+        'strategy handling a request with options passed to the authenticate method overriding strategy-level options': {
+            topic: function() {
+                return new AuthTktStrategy('abcdefghijklmnopqrstuvwxyz0123456789', {
+                    encodeUserData: true
+                });
+            },
+    
+            'after augmenting with actions': {
+                topic: function(strategy) {
+                    var self = this;
+                    var req = {};
+                    strategy.success = function(user, info) {
+                        req.authInfo = info;
+                        self.callback(null, req, user, info);
+                    };
+
+                    strategy.fail = function() {
+                        self.callback(new Error('should-not-be-called'), req);
+                    };
+                
+                    req.cookies = {
+                        authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFKb2UgQmxvZ2dz'
+                    };
+                    req.res = {};
+                    req.res.on = function(event, fn) {
+                    };
+                
+                    process.nextTick(function () {
+                         strategy.authenticate(req, {encodeUserData: false});
+                    });
+                },
+          
+                'should not fail' : function(err, req, user, info) {
+                    assert.isNull(err);
+                },
+                
+                'should set authInfo' : function(err, req, user, info) {
+                    assert.deepEqual(info, {
+                        digest: 'eea3630e98177bdbf0e7f803e1632b7e',
+                        userid: 'jbloggs',
+                        tokens: ['foo', 'bar'],
+                        userData: 'Joe Bloggs',
+                        timestamp: 1216720800
+                    });
+                },
+
+                'should set req.authInfo' : function(err, req, user, info) {
+                    assert.deepEqual(req.authInfo, {
+                        digest: 'eea3630e98177bdbf0e7f803e1632b7e',
+                        userid: 'jbloggs',
+                        tokens: ['foo', 'bar'],
+                        userData: 'Joe Bloggs',
+                        timestamp: 1216720800
+                    });
+                },
+
+                'should set user to be the user data' : function(err, req, user, info) {
+                    assert.equal(user, 'Joe Bloggs');
+                }
+            }
+        },
+
         'strategy updating cookie on response if a timeout is set': {
             topic: function() {
                 var timestamp = 1216720800;
