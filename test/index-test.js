@@ -1,7 +1,7 @@
 var vows = require('vows');
 var assert = require('assert');
 var util = require('util');
-var authtkt = require('passport-authtkt');
+var authtkt = require('../lib/passport-authtkt');
 
 
 vows.describe('passport-authtkt').addBatch({
