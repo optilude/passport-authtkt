@@ -1,6 +1,6 @@
 {
-  "name": "passport-authtkt",
-  "version": "0.0.2",
+  "name": "@aboutdotme/passport-authtkt",
+  "version": "1.0.0",
   "description": "mod_auth_tkt based authentication.",
   "keywords": [
     "passport",
