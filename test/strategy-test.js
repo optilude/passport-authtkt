@@ -1,21 +1,21 @@
 var vows = require('vows');
 var assert = require('assert');
 var util = require('util');
-var AuthTktStrategy = require('passport-authtkt/strategy');
-var BadRequestError = require('passport-authtkt/errors/badrequesterror');
-var authtktutils = require('passport-authtkt/authtktutils');
+var AuthTktStrategy = require('../lib/passport-authtkt/strategy');
+var BadRequestError = require('../lib/passport-authtkt/errors/badrequesterror');
+var authtktutils = require('../lib/passport-authtkt/authtktutils');
 
 vows.describe('AuthTktStrategy').addBatch({
 
     'strategy': {
         topic: new AuthTktStrategy('abcdefghijklmnopqrstuvwxyz0123456789'),
-        
+
         'should be named authtkt': function (strategy) {
             assert.equal(strategy.name, 'authtkt');
         },
 
         'strategy handling a request without cookie middleware configured': {
-        
+
             topic: function(strategy) {
                 var self = this;
                 var req = {};
@@ -26,11 +26,11 @@ vows.describe('AuthTktStrategy').addBatch({
                 strategy.fail = function() {
                     self.callback(new Error('should-be-called'), req);
                 };
-            
+
                 req.res = {};
                 req.res.on = function(event, fn) {
                 };
-            
+
                 process.nextTick(function () {
                     try {
                         strategy.authenticate(req);
@@ -39,11 +39,11 @@ vows.describe('AuthTktStrategy').addBatch({
                     }
                 });
             },
-      
+
             'should fail' : function(err, req, user, info) {
                 assert.isNotNull(err);
             },
-            
+
             'should not set authInfo' : function(err, req, user, info) {
                 assert.isUndefined(req.authInfo);
             }
@@ -53,7 +53,7 @@ vows.describe('AuthTktStrategy').addBatch({
             topic: function() {
                 return new AuthTktStrategy('abcdefghijklmnopqrstuvwxyz0123456789');
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -66,21 +66,21 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         self.callback(new Error('should-be-called'), req);
                     };
-                
+
                     req.cookies = {};
                     req.res = {};
                     req.res.on = function(event, fn) {
                     };
-                
+
                     process.nextTick(function () {
                         strategy.authenticate(req);
                     });
                 },
-          
+
                 'should fail' : function(err, req, user, info) {
                     assert.isNotNull(err);
                 },
-                
+
                 'should not set authInfo' : function(err, req, user, info) {
                     assert.isUndefined(req.authInfo);
                 }
@@ -91,7 +91,7 @@ vows.describe('AuthTktStrategy').addBatch({
             topic: function() {
                 return new AuthTktStrategy('abcdefghijklmnopqrstuvwxyz0123456789');
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -104,23 +104,23 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         self.callback(new Error('should-be-called'), req);
                     };
-                
+
                     req.cookies = {
                         authtkt: 'foo'
                     };
                     req.res = {};
                     req.res.on = function(event, fn) {
                     };
-                
+
                     process.nextTick(function () {
                         strategy.authenticate(req);
                     });
                 },
-          
+
                 'should fail' : function(err, req, user, info) {
                     assert.isNotNull(err);
                 },
-                
+
                 'should not set authInfo' : function(err, req, user, info) {
                     assert.isUndefined(req.authInfo);
                 }
@@ -131,7 +131,7 @@ vows.describe('AuthTktStrategy').addBatch({
             topic: function() {
                 return new AuthTktStrategy('abcdefghijklmnopqrstuvwxyz0123456789');
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -144,23 +144,23 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         self.callback(new Error('should-not-be-called'), req);
                     };
-                
+
                     req.cookies = {
                         authtkt: 'YzdjNzMwMGFjNWNmNTI5NjU2NDQ0MTIzYWNhMzQ1Mjk0ODg1YWZhMGpibG9nZ3Mh'
                     };
                     req.res = {};
                     req.res.on = function(event, fn) {
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req);
                     });
                 },
-          
+
                 'should not fail' : function(err, req, user, info) {
                     assert.isNull(err);
                 },
-                
+
                 'should set authInfo' : function(err, req, user, info) {
                     assert.deepEqual(info, {
                         digest: 'c7c7300ac5cf529656444123aca34529',
@@ -193,7 +193,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     encodeUserData: false
                 });
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -206,23 +206,23 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         self.callback(new Error('should-not-be-called'), req);
                     };
-                
+
                     req.cookies = {
                         authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFKb2UgQmxvZ2dz'
                     };
                     req.res = {};
                     req.res.on = function(event, fn) {
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req);
                     });
                 },
-          
+
                 'should not fail' : function(err, req, user, info) {
                     assert.isNull(err);
                 },
-                
+
                 'should set authInfo' : function(err, req, user, info) {
                     assert.deepEqual(info, {
                         digest: 'eea3630e98177bdbf0e7f803e1632b7e',
@@ -253,7 +253,7 @@ vows.describe('AuthTktStrategy').addBatch({
             topic: function() {
                 return new AuthTktStrategy('abcdefghijklmnopqrstuvwxyz0123456789');
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -266,23 +266,23 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         self.callback(new Error('should-not-be-called'), req);
                     };
-                
+
                     req.cookies = {
                         authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFKb2UgQmxvZ2dz'
                     };
                     req.res = {};
                     req.res.on = function(event, fn) {
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req, {encodeUserData: false});
                     });
                 },
-          
+
                 'should not fail' : function(err, req, user, info) {
                     assert.isNull(err);
                 },
-                
+
                 'should set authInfo' : function(err, req, user, info) {
                     assert.deepEqual(info, {
                         digest: 'eea3630e98177bdbf0e7f803e1632b7e',
@@ -315,7 +315,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     encodeUserData: true
                 });
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -328,23 +328,23 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         self.callback(new Error('should-not-be-called'), req);
                     };
-                
+
                     req.cookies = {
                         authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFKb2UgQmxvZ2dz'
                     };
                     req.res = {};
                     req.res.on = function(event, fn) {
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req, {encodeUserData: false});
                     });
                 },
-          
+
                 'should not fail' : function(err, req, user, info) {
                     assert.isNull(err);
                 },
-                
+
                 'should set authInfo' : function(err, req, user, info) {
                     assert.deepEqual(info, {
                         digest: 'eea3630e98177bdbf0e7f803e1632b7e',
@@ -382,7 +382,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     timestamp: timestamp + 10
                 });
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -395,7 +395,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         assert.fail(); // should not happen
                     };
-                
+
                     req.cookies = {
                         authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFTbTlsSUVKc2IyZG5jdz09'
                     };
@@ -410,12 +410,12 @@ vows.describe('AuthTktStrategy').addBatch({
                     req.res.cookie = function(name, val) {
                         req.res.cookies[name] = val;
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req);
                     });
                 },
-          
+
                 'should register a header event handler': function(req, event, fn) {
                     assert.equal(event, 'header');
                 },
@@ -447,7 +447,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     timestamp: timestamp + 10
                 });
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -460,7 +460,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         assert.fail(); // should not happen
                     };
-                
+
                     req.cookies = {
                         authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFTbTlsSUVKc2IyZG5jdz09'
                     };
@@ -475,12 +475,12 @@ vows.describe('AuthTktStrategy').addBatch({
                     req.res.cookie = function(name, val) {
                         req.res.cookies[name] = val;
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req);
                     });
                 },
-          
+
                 'should register a header event handler': function(req, event, fn) {
                     assert.equal(event, 'header');
                 },
@@ -513,7 +513,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     timestamp: timestamp + 10
                 });
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -526,7 +526,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         assert.fail(); // should not happen
                     };
-                
+
                     req.cookies = {
                         authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFTbTlsSUVKc2IyZG5jdz09'
                     };
@@ -541,12 +541,12 @@ vows.describe('AuthTktStrategy').addBatch({
                     req.res.cookie = function(name, val) {
                         req.res.cookies[name] = val;
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req);
                     });
                 },
-          
+
                 'should register a header event handler': function(req, event, fn) {
                     assert.equal(event, 'header');
                 },
@@ -579,7 +579,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     timestamp: timestamp + 10
                 });
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -592,7 +592,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         assert.fail(); // should not happen
                     };
-                
+
                     req.cookies = {
                         authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFTbTlsSUVKc2IyZG5jdz09'
                     };
@@ -607,12 +607,12 @@ vows.describe('AuthTktStrategy').addBatch({
                     req.res.cookie = function(name, val) {
                         req.res.cookies[name] = val;
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req);
                     });
                 },
-          
+
                 'should register a header event handler': function(req, event, fn) {
                     assert.equal(event, 'header');
                 },
@@ -645,7 +645,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     timestamp: timestamp + 10
                 });
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -658,7 +658,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         assert.fail(); // should not happen
                     };
-                
+
                     req.cookies = {
                         authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFTbTlsSUVKc2IyZG5jdz09'
                     };
@@ -673,12 +673,12 @@ vows.describe('AuthTktStrategy').addBatch({
                     req.res.cookie = function(name, val) {
                         req.res.cookies[name] = val;
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req);
                     });
                 },
-          
+
                 'should register a header event handler': function(req, event, fn) {
                     assert.equal(event, 'header');
                 },
@@ -700,7 +700,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     timestamp: timestamp + 10
                 });
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -713,7 +713,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     strategy.fail = function() {
                         assert.fail(); // should not happen
                     };
-                
+
                     req.cookies = {
                         authtkt: 'ZWVhMzYzMGU5ODE3N2JkYmYwZTdmODAzZTE2MzJiN2U0ODg1YWZhMGpibG9nZ3MhZm9vLGJhciFTbTlsSUVKc2IyZG5jdz09'
                     };
@@ -728,12 +728,12 @@ vows.describe('AuthTktStrategy').addBatch({
                     req.res.cookie = function(name, val) {
                         assert.fail(); // should not happen
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req);
                     });
                 },
-          
+
                 'should register a header event handler': function(req, event, fn) {
                     assert.equal(event, 'header');
                 },
@@ -756,7 +756,7 @@ vows.describe('AuthTktStrategy').addBatch({
                     timestamp: timestamp
                 });
             },
-    
+
             'after augmenting with actions': {
                 topic: function(strategy) {
                     var self = this;
@@ -767,9 +767,9 @@ vows.describe('AuthTktStrategy').addBatch({
                     };
 
                     strategy.fail = function() {
-                        
+
                     };
-                
+
                     req.cookies = {};
                     req.res = {};
                     req.res.cookies = {};
@@ -782,12 +782,12 @@ vows.describe('AuthTktStrategy').addBatch({
                     req.res.cookie = function(name, val) {
                         req.res.cookies[name] = val;
                     };
-                
+
                     process.nextTick(function () {
                          strategy.authenticate(req);
                     });
                 },
-          
+
                 'should register a header event handler': function(req, event, fn) {
                     assert.equal(event, 'header');
                 },
